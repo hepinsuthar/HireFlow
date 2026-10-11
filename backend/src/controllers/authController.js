@@ -121,5 +121,78 @@ const register = async (req, res, next) => {
     next(error);
   }
 };
+const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
 
-module.exports = { register };
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string" ||
+      !email.trim() ||
+      !password
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required.",
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    }).select("+passwordHash");
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password.",
+      });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "This account is inactive.",
+      });
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user.passwordHash
+    );
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password.",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        userId: user._id.toString(),
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful.",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+module.exports = { register, login };
