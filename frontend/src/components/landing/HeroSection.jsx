@@ -139,8 +139,8 @@ export function HeroSection({ isAuthenticated, getDashboardPath, scrollToSection
                 </span>
                 {/* Curved dashed arrow curving down toward top-right corner of laptop */}
                 <svg width="40" height="26" viewBox="0 0 40 26" fill="none" className="text-[#6366F1] mt-0.5 mr-1">
-                  <path d="M 6 4 C 26 4, 34 11, 28 20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeDasharray="3 3"/>
-                  <path d="M 33 14 L 28 20 L 22 17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M 6 4 C 26 4, 34 11, 28 20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeDasharray="3 3" />
+                  <path d="M 33 14 L 28 20 L 22 17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
             </div>
