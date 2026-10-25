@@ -1,0 +1,10 @@
+const router = require("express").Router();
+const controller = require("../controllers/interviewController");
+const { protect } = require("../middleware/authMiddleware");
+const { authorizeRoles } = require("../middleware/roleMiddleware");
+router.use(protect);
+router.get("/", controller.listInterviews);
+router.post("/", authorizeRoles("recruiter", "admin"), controller.createInterview);
+router.put("/:id", authorizeRoles("recruiter", "admin"), controller.updateInterview);
+router.delete("/:id", authorizeRoles("recruiter", "admin"), controller.deleteInterview);
+module.exports = router;

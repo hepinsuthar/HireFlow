@@ -1,0 +1,12 @@
+const router = require("express").Router();
+const controller = require("../controllers/jobController");
+const { protect } = require("../middleware/authMiddleware");
+const { authorizeRoles } = require("../middleware/roleMiddleware");
+router.get("/", controller.listJobs);
+router.get("/:id", controller.getJob);
+router.get("/:id/match", protect, authorizeRoles("candidate"), controller.getJobMatch);
+router.post("/", protect, authorizeRoles("recruiter", "admin"), controller.createJob);
+router.put("/:id", protect, authorizeRoles("recruiter", "admin"), controller.updateJob);
+router.patch("/:id/status", protect, authorizeRoles("recruiter", "admin"), controller.updateJobStatus);
+router.delete("/:id", protect, authorizeRoles("recruiter", "admin"), controller.deleteJob);
+module.exports = router;

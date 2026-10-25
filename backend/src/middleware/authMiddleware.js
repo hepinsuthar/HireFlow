@@ -1,57 +1,22 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+const AppError = require("../utils/AppError");
+const asyncHandler = require("../utils/asyncHandler");
 
-const protect = (req, res, next) => {
+const protect = asyncHandler(async (req, res, next) => {
+  const header = req.headers.authorization || "";
+  const [scheme, token] = header.split(" ");
+  if (scheme !== "Bearer" || !token) throw new AppError("Authentication required. Provide a Bearer token.", 401);
+  let decoded;
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication required. Please log in.",
-      });
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication token is missing.",
-      });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (
-      !decoded.userId ||
-      !["candidate", "recruiter", "admin"].includes(decoded.role)
-    ) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid authentication token.",
-      });
-    }
-
-    req.user = {
-      userId: decoded.userId,
-      role: decoded.role,
-    };
-
-    next();
-  } catch (error) {
-    if (
-      error.name === "TokenExpiredError" ||
-      error.name === "JsonWebTokenError" ||
-      error.name === "NotBeforeError"
-    ) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid or expired authentication token.",
-      });
-    }
-
-    next(error);
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    throw new AppError("Invalid or expired token.", 401);
   }
-};
+  const user = await User.findById(decoded.userId).select("_id role isActive");
+  if (!user || !user.isActive) throw new AppError("Account not found or disabled.", 401);
+  req.user = { userId: user._id.toString(), role: user.role };
+  next();
+});
 
 module.exports = { protect };

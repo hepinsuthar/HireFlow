@@ -1,0 +1,11 @@
+const router = require("express").Router();
+const controller = require("../controllers/companyController");
+const { protect } = require("../middleware/authMiddleware");
+const { authorizeRoles } = require("../middleware/roleMiddleware");
+router.get("/", controller.listCompanies);
+router.get("/:id", controller.getCompany);
+router.post("/", protect, authorizeRoles("recruiter", "admin"), controller.createCompany);
+router.put("/:id", protect, authorizeRoles("recruiter", "admin"), controller.updateCompany);
+router.patch("/:id", protect, authorizeRoles("recruiter", "admin"), controller.updateCompany);
+router.delete("/:id", protect, authorizeRoles("recruiter", "admin"), controller.deleteCompany);
+module.exports = router;

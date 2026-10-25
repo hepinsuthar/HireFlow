@@ -1,0 +1,13 @@
+const router = require("express").Router();
+const controller = require("../controllers/applicationController");
+const { protect } = require("../middleware/authMiddleware");
+const { authorizeRoles } = require("../middleware/roleMiddleware");
+router.use(protect);
+router.get("/", authorizeRoles("recruiter", "admin"), controller.listAll);
+router.post("/", authorizeRoles("candidate"), controller.applyToJob);
+router.get("/mine", authorizeRoles("candidate"), controller.mine);
+router.get("/job/:jobId", authorizeRoles("recruiter", "admin"), controller.byJob);
+router.get("/:id", controller.getOne);
+router.patch("/:id/status", authorizeRoles("recruiter", "admin"), controller.updateStatus);
+router.post("/:id/evaluate", authorizeRoles("recruiter", "admin"), controller.addEvaluation);
+module.exports = router;
